@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Tarssio Barreto">
+
+<title>Censo Agropecuário</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="tutorial_censo_agro_files/libs/clipboard/clipboard.min.js"></script>
+<script src="tutorial_censo_agro_files/libs/quarto-html/quarto.js"></script>
+<script src="tutorial_censo_agro_files/libs/quarto-html/popper.min.js"></script>
+<script src="tutorial_censo_agro_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="tutorial_censo_agro_files/libs/quarto-html/anchor.min.js"></script>
+<link href="tutorial_censo_agro_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="tutorial_censo_agro_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="tutorial_censo_agro_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="tutorial_censo_agro_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="tutorial_censo_agro_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Censo Agropecuário</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Tarssio Barreto </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="análise-exploratória-dos-dados-referentes-ao-censo-agropecuário-2017" class="level2">
+<h2 class="anchored" data-anchor-id="análise-exploratória-dos-dados-referentes-ao-censo-agropecuário-2017">Análise exploratória dos dados referentes ao Censo Agropecuário 2017</h2>
+<p>O objetivo desta análise é evidênciar a concentração fundiária na zona rural do Brasil, comparando, assim, a quantidade de estabelecimentos rurais com a área total destes.</p>
+</section>
+<section id="tutorial" class="level2">
+<h2 class="anchored" data-anchor-id="tutorial">Tutorial</h2>
+<section id="carregar-os-dados" class="level3">
+<h3 class="anchored" data-anchor-id="carregar-os-dados">Carregar os dados</h3>
+<p>Os dados estão disponíveis no <a href="https://sidra.ibge.gov.br/pesquisa/censo-agropecuario/censo-agropecuario-2017/resultados-definitivos">SIDRA</a>.</p>
+<p>Como foram solicitados os dados, por município, referentes ao número de estabelecimento e o somatório da área destes, separados por agricultura familiar ou não, se tornou necessário limpar os bancos de dados obtidos:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: tidyverse</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.2     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">require</span>(readxl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required package: readxl</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggbeeswarm)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(geobr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Loading required namespace: sf</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(wesanderson)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">### CARREGANDO A TABELA DE ESTABELECIMENTOS, pulamos as 5 primeiras linhas e renomeamos as demais: </span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>df_estab <span class="ot">&lt;-</span> <span class="fu">read_xlsx</span>(<span class="st">"data/tabela6770-2.xlsx"</span>, <span class="at">sheet =</span> <span class="dv">1</span>, <span class="at">skip =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">municipio =</span> <span class="dv">1</span>, </span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">estab_agro_negocio =</span> <span class="dv">2</span>, </span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">estab_agro_familiar =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E2918 / R2918C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3255 / R3255C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3342 / R3342C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3481 / R3481C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3503 / R3503C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3762 / R3762C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3810 / R3810C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3813 / R3813C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E4668 / R4668C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E4764 / R4764C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`
+• `` -&gt; `...2`
+• `` -&gt; `...3`
+• `Total` -&gt; `Total...4`
+• `Total` -&gt; `Total...5`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="do">### CARREGANDO A TABELA DE ÁREAS, pulamos as 5 primeiras linhas e renomeamos as demais: </span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>df_area <span class="ot">&lt;-</span> <span class="fu">read_xlsx</span>(<span class="st">"data/tabela6770-2.xlsx"</span>, <span class="at">sheet =</span> <span class="dv">2</span>, <span class="at">skip =</span> <span class="dv">5</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">municipio =</span> <span class="dv">1</span>, </span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">area_agro_negocio =</span> <span class="dv">2</span>, </span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">area_agro_familiar =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D1096 / R1096C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E1096 / R1096C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D1533 / R1533C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E1533 / R1533C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D2447 / R2447C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E2447 / R2447C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D2918 / R2918C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E2918 / R2918C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3187 / R3187C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3187 / R3187C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3190 / R3190C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3190 / R3190C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3255 / R3255C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3255 / R3255C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3285 / R3285C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3285 / R3285C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3302 / R3302C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3302 / R3302C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3342 / R3342C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3342 / R3342C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3359 / R3359C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3359 / R3359C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3380 / R3380C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3380 / R3380C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3419 / R3419C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3419 / R3419C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3422 / R3422C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3422 / R3422C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3425 / R3425C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3425 / R3425C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3454 / R3454C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3454 / R3454C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3481 / R3481C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3503 / R3503C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3527 / R3527C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3527 / R3527C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3713 / R3713C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3713 / R3713C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3754 / R3754C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3754 / R3754C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3762 / R3762C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3810 / R3810C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3810 / R3810C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3813 / R3813C4: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3837 / R3837C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3837 / R3837C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3856 / R3856C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3856 / R3856C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3865 / R3865C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3865 / R3865C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D3902 / R3902C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E3902 / R3902C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D4128 / R4128C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E4128 / R4128C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E4668 / R4668C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D4764 / R4764C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E4764 / R4764C5: got '-'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in D5564 / R5564C4: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Expecting numeric in E5564 / R5564C5: got 'X'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+• `` -&gt; `...1`
+• `` -&gt; `...2`
+• `` -&gt; `...3`
+• `Total` -&gt; `Total...4`
+• `Total` -&gt; `Total...5`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Juntando os bancos de dados por municipio: </span></span>
+<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df_area, df_estab)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(municipio)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="do">## AJUSTANDO O NOME DOS MUNICIPIOS</span></span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>pattern <span class="ot">&lt;-</span> <span class="st">"^(.*?) </span><span class="sc">\\</span><span class="st">((</span><span class="sc">\\</span><span class="st">w{2})</span><span class="sc">\\</span><span class="st">)$"</span></span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>df_matched <span class="ot">&lt;-</span> <span class="fu">str_match</span>(df<span class="sc">$</span>municipio, pattern)</span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>municipio <span class="ot">&lt;-</span> <span class="fu">tolower</span>(df_matched[, <span class="dv">2</span>])</span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>df<span class="sc">$</span>uf <span class="ot">&lt;-</span> df_matched[, <span class="dv">3</span>]</span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a><span class="do">### Agora carregando modulos fiscais: </span></span>
+<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a>modulos_fiscais <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"data/modulos_fiscais.csv"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">municipio =</span> <span class="fu">tolower</span>(municipio)) <span class="sc">|&gt;</span> </span>
+<span id="cb83-11"><a href="#cb83-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">uf =</span> UF, </span>
+<span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">modulos_fiscais =</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb83-13"><a href="#cb83-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">c</span>(<span class="dv">4</span>, <span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>New names:
+Rows: 5563 Columns: 5
+── Column specification
+──────────────────────────────────────────────────────── Delimiter: "," chr
+(2): municipio, UF dbl (1): Módulo fiscal (ha) lgl (2): ...4, ...5
+ℹ Use `spec()` to retrieve the full column specification for this data. ℹ
+Specify the column types or set `show_col_types = FALSE` to quiet this message.
+• `` -&gt; `...4`
+• `` -&gt; `...5`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="do">### Unindo</span></span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">left_join</span>(df, modulos_fiscais) <span class="sc">|&gt;</span> </span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(modulos_fiscais <span class="sc">!=</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">area_media_agro_familiar =</span> area_agro_familiar<span class="sc">/</span> estab_agro_familiar , </span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">area_media_agro_negocio =</span> area_agro_negocio<span class="sc">/</span> estab_agro_negocio ) <span class="sc">|&gt;</span> </span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">modulos_fiscais_familiar =</span> area_media_agro_familiar<span class="sc">/</span>modulos_fiscais, </span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">modulos_fiscais_agro_negocio =</span> area_media_agro_negocio<span class="sc">/</span>modulos_fiscais) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(municipio, uf)`</code></pre>
+</div>
+</div>
+</section>
+<section id="explorando-os-dados" class="level3">
+<h3 class="anchored" data-anchor-id="explorando-os-dados">Explorando os dados:</h3>
+<p>A agricultura familiar possui, no total, cerca de 3,5x menos terras do que a agricultura não familiar:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="st">`</span><span class="at">Àrea total com agricultura familiar</span><span class="st">`</span> </span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>            <span class="ot">=</span> <span class="fu">sum</span>(area_agro_familiar, <span class="at">na.rm =</span> T), </span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">Àrea total com agricultura não familiar</span><span class="st">`</span> </span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>            <span class="ot">=</span> <span class="fu">sum</span>(area_agro_negocio, <span class="at">na.rm =</span> T)) <span class="sc">|&gt;</span> </span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Proporção de áreas</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">Àrea total com agricultura não familiar</span><span class="st">`</span><span class="sc">/</span> </span>
+<span id="cb87-7"><a href="#cb87-7" aria-hidden="true" tabindex="-1"></a>           <span class="st">`</span><span class="at">Àrea total com agricultura familiar</span><span class="st">`</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  Àrea total com agricultura famil…¹ Àrea total com agric…² `Proporção de áreas`
+                               &lt;dbl&gt;                  &lt;dbl&gt;                &lt;dbl&gt;
+1                           78858149              261539172                 3.32
+# ℹ abbreviated names: ¹​`Àrea total com agricultura familiar`,
+#   ²​`Àrea total com agricultura não familiar`</code></pre>
+</div>
+</div>
+<p>Apesar disto, temos cerca de 3x mais estabelecimentos de agricultura familiar:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span></span>
+<span id="cb89-2"><a href="#cb89-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="st">`</span><span class="at">Estabelecimento totais com agricultura familiar</span><span class="st">`</span> </span>
+<span id="cb89-3"><a href="#cb89-3" aria-hidden="true" tabindex="-1"></a>            <span class="ot">=</span> <span class="fu">sum</span>(estab_agro_familiar, <span class="at">na.rm =</span> T), </span>
+<span id="cb89-4"><a href="#cb89-4" aria-hidden="true" tabindex="-1"></a>            <span class="st">`</span><span class="at">Estabelecimentos totais com agricultura não familiar</span><span class="st">`</span> </span>
+<span id="cb89-5"><a href="#cb89-5" aria-hidden="true" tabindex="-1"></a>            <span class="ot">=</span> <span class="fu">sum</span>(estab_agro_negocio, <span class="at">na.rm =</span> T)) <span class="sc">|&gt;</span> </span>
+<span id="cb89-6"><a href="#cb89-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="st">`</span><span class="at">Proporção de estabelecimentos</span><span class="st">`</span> <span class="ot">=</span> <span class="st">`</span><span class="at">Estabelecimentos totais com agricultura não familiar</span><span class="st">`</span><span class="sc">/</span> <span class="st">`</span><span class="at">Estabelecimento totais com agricultura familiar</span><span class="st">`</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  Estabelecimento totais com agr…¹ Estabelecimentos tot…² Proporção de estabel…³
+                             &lt;dbl&gt;                  &lt;dbl&gt;                  &lt;dbl&gt;
+1                          3796371                1142960                  0.301
+# ℹ abbreviated names: ¹​`Estabelecimento totais com agricultura familiar`,
+#   ²​`Estabelecimentos totais com agricultura não familiar`,
+#   ³​`Proporção de estabelecimentos`</code></pre>
+</div>
+</div>
+<p>Duas formas de observar a distribuição destas médias de áreas por estabelecimento podem ser vista abaixo:</p>
+</section>
+<section id="usando-histograma" class="level3">
+<h3 class="anchored" data-anchor-id="usando-histograma">Usando histograma:</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> </span>
+<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(municipio, modulos_fiscais_familiar, modulos_fiscais_agro_negocio) <span class="sc">|&gt;</span> </span>
+<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>  reshape2<span class="sc">::</span><span class="fu">melt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Tipo =</span> <span class="dv">2</span>, </span>
+<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Módulos Fiscais"</span> <span class="ot">=</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Tipo =</span> <span class="fu">ifelse</span>(Tipo <span class="sc">==</span> <span class="st">"modulos_fiscais_familiar"</span>, </span>
+<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Agricultura familiar"</span>, <span class="st">"Agricultura não familiar"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Módulos Fiscais</span><span class="st">`</span>, <span class="at">fill =</span> Tipo)) <span class="sc">+</span> </span>
+<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">cex =</span> <span class="fl">0.5</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span> </span>
+<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#DC863B"</span>, <span class="st">"#C93312"</span>)) <span class="sc">+</span> </span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">""</span>, <span class="at">fill =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Using municipio as id variables</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Using `size` aesthetic for lines was deprecated in ggplot2 3.4.0.
+ℹ Please use `linewidth` instead.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>`stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 56 rows containing non-finite values (`stat_bin()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="tutorial_censo_agro_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Usando beeswarm:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>df <span class="sc">|&gt;</span> </span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(municipio, modulos_fiscais_familiar, modulos_fiscais_agro_negocio) <span class="sc">|&gt;</span> </span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>  reshape2<span class="sc">::</span><span class="fu">melt</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">Tipo =</span> <span class="dv">2</span>, </span>
+<span id="cb97-5"><a href="#cb97-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Módulos Fiscais"</span> <span class="ot">=</span> <span class="dv">3</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb97-6"><a href="#cb97-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">Tipo =</span> <span class="fu">ifelse</span>(Tipo <span class="sc">==</span> <span class="st">"modulos_fiscais_familiar"</span>, </span>
+<span id="cb97-7"><a href="#cb97-7" aria-hidden="true" tabindex="-1"></a>                       <span class="st">"Agricultura familiar"</span>, <span class="st">"Agricultura não familiar"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb97-8"><a href="#cb97-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="st">`</span><span class="at">Módulos Fiscais</span><span class="st">`</span>, </span>
+<span id="cb97-9"><a href="#cb97-9" aria-hidden="true" tabindex="-1"></a>             <span class="at">y =</span> Tipo, <span class="at">col =</span> Tipo)) <span class="sc">+</span> </span>
+<span id="cb97-10"><a href="#cb97-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_quasirandom</span>(<span class="at">cex =</span> <span class="fl">0.5</span>) <span class="sc">+</span></span>
+<span id="cb97-11"><a href="#cb97-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_colour_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"#DC863B"</span>, <span class="st">"#C93312"</span>)) <span class="sc">+</span> </span>
+<span id="cb97-12"><a href="#cb97-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span> </span>
+<span id="cb97-13"><a href="#cb97-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span> </span>
+<span id="cb97-14"><a href="#cb97-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">""</span>, <span class="at">col =</span> <span class="st">""</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Using municipio as id variables</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Transformation introduced infinite values in continuous x-axis</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Orientation inferred to be along y-axis; override with
+`position_quasirandom(orientation = 'x')`</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 55 rows containing missing values (`position_quasirandom()`).</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 rows containing missing values (`geom_point()`).</code></pre>
+</div>
+<div class="cell-output-display">
+<p><img src="tutorial_censo_agro_files/figure-html/unnamed-chunk-5-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Representando em mapa:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="do">## definindo paleta de cores</span></span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a>pal <span class="ot">&lt;-</span> <span class="fu">wes_palette</span>(<span class="st">"Zissou1"</span>, <span class="dv">10</span>, <span class="at">type =</span> <span class="st">"continuous"</span>)</span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a><span class="do">### Carregando municipios: </span></span>
+<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(df<span class="sc">$</span>modulos_fiscais_familiar, <span class="at">na.rm =</span> T)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>          0%          25%          50%          75%         100% 
+ 0.001003542  0.363754588  0.687084149  0.953226423 13.067777778 </code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>mun <span class="ot">&lt;-</span> <span class="fu">read_municipality</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">municipio =</span> name_muni, </span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">uf =</span> abbrev_state) <span class="sc">|&gt;</span> </span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">municipio =</span> <span class="fu">tolower</span>(municipio)) <span class="sc">|&gt;</span> </span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df) <span class="sc">|&gt;</span> </span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">na.omit</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(modulos_fiscais_familiar, </span>
+<span id="cb105-8"><a href="#cb105-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">.fn =</span> <span class="cf">function</span>(x) <span class="fu">cut</span>(x, <span class="fu">quantile</span>(x, <span class="dv">0</span><span class="sc">:</span><span class="dv">10</span><span class="sc">/</span><span class="dv">10</span>)))) <span class="sc">|&gt;</span> </span>
+<span id="cb105-9"><a href="#cb105-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(modulos_fiscais_agro_negocio, </span>
+<span id="cb105-10"><a href="#cb105-10" aria-hidden="true" tabindex="-1"></a>                <span class="at">.fn =</span> <span class="cf">function</span>(x) <span class="fu">cut</span>(x, <span class="fu">quantile</span>(x, <span class="dv">0</span><span class="sc">:</span><span class="dv">10</span><span class="sc">/</span><span class="dv">10</span>))))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Using year 2010</code></pre>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code>
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |===                                                                   |   4%
+  |                                                                            
+  |=====                                                                 |   7%
+  |                                                                            
+  |========                                                              |  11%
+  |                                                                            
+  |==========                                                            |  15%
+  |                                                                            
+  |=============                                                         |  19%
+  |                                                                            
+  |================                                                      |  22%
+  |                                                                            
+  |==================                                                    |  26%
+  |                                                                            
+  |=====================                                                 |  30%
+  |                                                                            
+  |=======================                                               |  33%
+  |                                                                            
+  |==========================                                            |  37%
+  |                                                                            
+  |=============================                                         |  41%
+  |                                                                            
+  |===============================                                       |  44%
+  |                                                                            
+  |==================================                                    |  48%
+  |                                                                            
+  |====================================                                  |  52%
+  |                                                                            
+  |=======================================                               |  56%
+  |                                                                            
+  |=========================================                             |  59%
+  |                                                                            
+  |============================================                          |  63%
+  |                                                                            
+  |===============================================                       |  67%
+  |                                                                            
+  |=================================================                     |  70%
+  |                                                                            
+  |====================================================                  |  74%
+  |                                                                            
+  |======================================================                |  78%
+  |                                                                            
+  |=========================================================             |  81%
+  |                                                                            
+  |============================================================          |  85%
+  |                                                                            
+  |==============================================================        |  89%
+  |                                                                            
+  |=================================================================     |  93%
+  |                                                                            
+  |===================================================================   |  96%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Joining with `by = join_by(municipio, uf)`</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb109"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a>mun <span class="sc">|&gt;</span> </span>
+<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb109-3"><a href="#cb109-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> modulos_fiscais_agro_negocio), <span class="at">color=</span><span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb109-4"><a href="#cb109-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> pal) <span class="sc">+</span> </span>
+<span id="cb109-5"><a href="#cb109-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="tutorial_censo_agro_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+</section>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
