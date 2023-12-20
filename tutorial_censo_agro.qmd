@@ -102,7 +102,7 @@ df |>
            `Àrea total com agricultura familiar`) 
 ```
 
-Completa esta visão geral da concentração fundiária, o fato de que há mais do que ```3``` vezes mais estabelecimentos agropecuários que são caracterizados pela agricultura familiar:
+Completa esta visão geral da concentração fundiária, o fato de que há mais do que `3` vezes mais estabelecimentos agropecuários que são caracterizados pela agricultura familiar:
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -115,12 +115,68 @@ df |>
 
 ```
 
+Formas distintas de observar a distribuição destas médias de áreas por estabelecimento podem ser vista abaixo:
 
-Duas formas de observar a distribuição destas médias de áreas por estabelecimento podem ser vista abaixo:
+### Por categoria
 
-### Usando histograma:
+Primeiramente, veremos, para agricultura familiar ou não, qual o tipo de propriedade média para cada um dos municípios.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
+
+df |> 
+  mutate(modulos_fiscais_familiar = case_when(
+    modulos_fiscais_familiar < 1 ~ "Minifúndio", 
+    modulos_fiscais_familiar >= 1 & modulos_fiscais_familiar < 4  ~ 
+      "Pequena propriedade", 
+    modulos_fiscais_familiar >= 4 & modulos_fiscais_familiar < 15  ~ 
+      "Média propriedade", 
+    modulos_fiscais_familiar >= 15  ~ 
+      "Grande propriedade"
+  )) |> 
+  mutate(modulos_fiscais_agro_negocio = case_when(
+    modulos_fiscais_agro_negocio < 1 ~ "Minifúndio", 
+    modulos_fiscais_agro_negocio >= 1 & modulos_fiscais_agro_negocio < 4  ~ 
+      "Pequena propriedade", 
+    modulos_fiscais_agro_negocio >= 4 & modulos_fiscais_agro_negocio < 15  ~ 
+      "Média propriedade", 
+    modulos_fiscais_agro_negocio >= 15  ~ 
+      "Grande propriedade"
+  )) |> 
+  select(municipio, modulos_fiscais_familiar, modulos_fiscais_agro_negocio) |> 
+  reshape2::melt("municipio") |> 
+  rename(Tipo = 2, 
+         "Módulos Fiscais" = 3) |> 
+  mutate(Tipo = ifelse(Tipo == "modulos_fiscais_familiar", 
+                       "Agricultura familiar", "Agricultura não familiar"))  |> 
+  group_by(Tipo, `Módulos Fiscais`) |> 
+  summarise(n = n()) |> 
+  na.omit() |> 
+  group_by(Tipo) |> 
+  mutate(`Proporções` = round(n/sum(n), 2)) |> 
+  mutate(`Módulos Fiscais` = fct_relevel(`Módulos Fiscais`, 
+                                         c("Minifúndio", 
+                                           "Pequena propriedade", 
+                                           "Média propriedade", 
+                                           "Grande propriedade"))) |> 
+  ggplot(aes(x = `Proporções`, y = `Módulos Fiscais`, fill = Tipo)) + 
+  geom_col(show.legend = F) + 
+  facet_wrap(~Tipo) + 
+  scale_fill_manual(values = c("#FF0000", "#5BBCD6")) + 
+  scale_x_continuous(labels = scales::percent) + 
+  theme_bw()
+
+```
+
+Levando em consideração a área média das propriedades de cada um dos municípios temos que:
+
+a)  Para a agricultura familiar, cerca de 80% dos municípios tem como área média dos seus estabelecimentos valores inferiores a 1 módulo fiscal, ou seja, há a concentração de minifúndios;
+
+b)  Para a agricultura não familiar: As propriedades estão concentradas entre 1 e 14 módulos fiscais (pequenas e médias propriedades).
+
+Para corroborar estes valores pontuais, a seguir trabalharemos com as distribuições.
+Primeiro é mostrado um ```histograma```e o gráfico de dispersão ```beeswarm```.
+
+```{r message=FALSE, warning=FALSE}
 
 df |> 
   select(municipio, modulos_fiscais_familiar, modulos_fiscais_agro_negocio) |> 
@@ -131,16 +187,18 @@ df |>
                        "Agricultura familiar", "Agricultura não familiar")) |> 
   ggplot(aes(x = `Módulos Fiscais`, fill = Tipo)) + 
   geom_histogram(cex = 0.5, alpha = 0.7) +
-  scale_x_log10() + 
+  scale_x_log10(breaks = c(1, 4, 14)) + 
   scale_fill_manual(values = c("#DC863B", "#C93312")) + 
   theme_bw() + 
   labs(y = "", fill = "")
 
 ```
 
-Usando beeswarm:
+A partir do histograma conseguimos corroborar a concentração fundiária a partir das áreas médias, por município e por tipo de agricultura, para os estabelecimentos rurais.
 
-```{r}
+O gráfico de ```beeswarm``` é uma outra forma interessante de evidenciar esta concentração fundiária. De certa forma, gosto de pensar neste gráfico como um substituto para o ```violin plot```, fornecendo, como diferencial ao histograma, a possibilidade de observar locais onde não há dados e ter, também, uma visualização fidedigna da amplitude dos dados. 
+
+```{r message=FALSE, warning=FALSE}
 
 df |> 
   select(municipio, modulos_fiscais_familiar, modulos_fiscais_agro_negocio) |> 
@@ -151,7 +209,7 @@ df |>
                        "Agricultura familiar", "Agricultura não familiar")) |> 
   ggplot(aes(x = `Módulos Fiscais`, 
              y = Tipo, col = Tipo)) + 
-  geom_quasirandom(cex = 0.5) +
+  geom_quasirandom(cex = 0.5, show.legend = F) +
   scale_colour_manual(values = c("#DC863B", "#C93312")) + 
   scale_x_log10() + 
   theme_bw() + 
@@ -159,20 +217,37 @@ df |>
 
 ```
 
-Representando em mapa:
-
-\`\`\`{r}
+Por fim, 
+```{r}
 
 ## definindo paleta de cores
 
-pal \<- wes_palette("Zissou1", 10, type = "continuous")
-
+pal <- wes_palette("Zissou1", 10, type = "continuous")
 ### Carregando municipios:
 
-quantile(df\$modulos_fiscais_familiar, na.rm = T)
+quantile(df$modulos_fiscais_familiar, na.rm = T)
 
-mun \<- read_municipality() \|\> rename(municipio = name_muni, uf = abbrev_state) \|\> mutate(municipio = tolower(municipio)) \|\> left_join(df) \|\> na.omit() \|\> mutate(across(modulos_fiscais_familiar, .fn = function(x) cut(x, quantile(x, 0:10/10)))) \|\> mutate(across(modulos_fiscais_agro_negocio, .fn = function(x) cut(x, quantile(x, 0:10/10))))
+mun <-
+  read_municipality() |> 
+  rename(municipio = name_muni, uf = abbrev_state) |> 
+  mutate(municipio = tolower(municipio)) |> 
+  left_join(df) |> na.omit() |> 
+  mutate(across(
+    modulos_fiscais_familiar,
+    .fn = function(x)
+      cut(x, quantile(x, 0:10 / 10))
+  )) |> mutate(across(
+    modulos_fiscais_agro_negocio,
+    .fn = function(x)
+      cut(x, quantile(x, 0:10 / 10))
+  ))
 
-mun \|\> ggplot() + geom_sf(aes(fill = modulos_fiscais_agro_negocio), color=NA) + scale_fill_manual(values = pal) + theme_void()
 
-\`\`\`\`
+### Mapa
+mun |> ggplot() + 
+  geom_sf(aes(fill = modulos_fiscais_agro_negocio), 
+          color =NA) + 
+  scale_fill_manual(values = pal) + 
+  theme_void()
+
+```
