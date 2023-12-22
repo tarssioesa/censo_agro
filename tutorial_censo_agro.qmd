@@ -20,6 +20,8 @@ Uma [classificação](http://www.planalto.gov.br/ccivil_03/leis/l8629.htm) impor
 -   Média propriedade: Imóvel rural com área entre 4 e 15 módulos fiscais;e
 -   Grande propriedade: Imóvel com área superior a 15 módulos fiscais.
 
+Obs: As propriedades designadas para agricultura familiar podem ter até 4 módulos fiscais.
+
 ## Tutorial em R:
 
 ### Carregar os dados
@@ -217,37 +219,32 @@ df |>
 
 ```
 
-Por fim, 
+Por fim, apresenta-se um mapa com a concentração fundiária para os estabelecimentos de agricultura não familiar. Evidenciando, principalmente, o centro-oeste como fronteira agrícola do país.
+
 ```{r}
 
 ## definindo paleta de cores
 
-pal <- wes_palette("Zissou1", 10, type = "continuous")
+pal <- wes_palette("Zissou1", 4, type = "continuous")
+
 ### Carregando municipios:
 
-quantile(df$modulos_fiscais_familiar, na.rm = T)
-
 mun <-
-  read_municipality() |> 
+  read_municipality() |> # contorno dos municipios
   rename(municipio = name_muni, uf = abbrev_state) |> 
   mutate(municipio = tolower(municipio)) |> 
   left_join(df) |> na.omit() |> 
   mutate(across(
-    modulos_fiscais_familiar,
-    .fn = function(x)
-      cut(x, quantile(x, 0:10 / 10))
-  )) |> mutate(across(
     modulos_fiscais_agro_negocio,
     .fn = function(x)
-      cut(x, quantile(x, 0:10 / 10))
+      cut(x, c(0, 1, 4, 14, Inf))
   ))
-
 
 ### Mapa
 mun |> ggplot() + 
-  geom_sf(aes(fill = modulos_fiscais_agro_negocio), 
-          color =NA) + 
+  geom_sf(aes(fill = modulos_fiscais_agro_negocio), col = "black") + 
   scale_fill_manual(values = pal) + 
+  labs(fill = "Módulos fiscais médios") + 
   theme_void()
 
 ```
