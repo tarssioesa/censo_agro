@@ -175,8 +175,7 @@ a)  Para a agricultura familiar, cerca de 80% dos municípios tem como área mé
 
 b)  Para a agricultura não familiar: As propriedades estão concentradas entre 1 e 14 módulos fiscais (pequenas e médias propriedades).
 
-Para corroborar estes valores pontuais, a seguir trabalharemos com as distribuições.
-Primeiro é mostrado um ```histograma```e o gráfico de dispersão ```beeswarm```.
+Para corroborar estes valores pontuais, a seguir trabalharemos com as distribuições. Primeiro é mostrado um `histograma`e o gráfico de dispersão `beeswarm`.
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -198,7 +197,7 @@ df |>
 
 A partir do histograma conseguimos corroborar a concentração fundiária a partir das áreas médias, por município e por tipo de agricultura, para os estabelecimentos rurais.
 
-O gráfico de ```beeswarm``` é uma outra forma interessante de evidenciar esta concentração fundiária. De certa forma, gosto de pensar neste gráfico como um substituto para o ```violin plot```, fornecendo, como diferencial ao histograma, a possibilidade de observar locais onde não há dados e ter, também, uma visualização fidedigna da amplitude dos dados. 
+O gráfico de `beeswarm` é uma outra forma interessante de evidenciar esta concentração fundiária. De certa forma, gosto de pensar neste gráfico como um substituto para o `violin plot`, fornecendo, como diferencial ao histograma, a possibilidade de observar locais onde não há dados e ter, também, uma visualização fidedigna da amplitude dos dados.
 
 ```{r message=FALSE, warning=FALSE}
 
@@ -246,5 +245,8 @@ mun |> ggplot() +
   scale_fill_manual(values = pal) + 
   labs(fill = "Módulos fiscais médios") + 
   theme_void()
+
+ggsave(file = "resultado/mapa.jpeg",
+       dpi = 1000, width = 20, height = 14)  
 
 ```
