@@ -21,3 +21,5 @@ b) Mapa da média de área em  módulos fiscais para agricultura não familiar:
 <img src="https://i.ibb.co/BsnBJL7/mapa.jpg" alt="mapa" border="0">
 
 obs: Em algums municípios a diferença de gráfia por isto não há dados.
+
+c) Uma breve história dos dados e tutorial estão disponíveis [aqui](https://github.com/tarssioesa/censo_agro/blob/main/tutorial_censo_agro.qmd)
